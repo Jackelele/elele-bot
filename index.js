@@ -30,10 +30,11 @@ const client = new Client({
         Partials.ThreadMember,
     ]
 });
-const moment = require("moment");
 
-client.commands = new Collection();
-client.slashCommands = new Collection();
+
+client.scommands = new Collection();
+client.mcommands = new Collection()
+client.config = config;
 
 module.exports = client;
 

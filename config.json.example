@@ -1,0 +1,11 @@
+{
+    "token": "",
+    "prefix": "!",
+    "owners": [
+        "377175513372033024",
+    ],
+    "slash": {
+        "global": false,
+        "guild": ""
+    }
+}
