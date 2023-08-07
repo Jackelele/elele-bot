@@ -1,7 +1,10 @@
-const config = require('./config');
-const fs = require("fs");
-const colors = require("ansi-colors");
-const { Client, GatewayIntentBits, Partials, Collection } = require('discord.js');
+const {
+    Client,
+    Collection,
+    Events,
+    GatewayIntentBits,
+    Partials,
+} = require("discord.js");
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -20,6 +23,7 @@ const client = new Client({
         GatewayIntentBits.DirectMessageTyping,
         GatewayIntentBits.MessageContent,
     ],
+    shards: "auto",
     partials: [
         Partials.Message,
         Partials.Channel,
@@ -28,28 +32,46 @@ const client = new Client({
         Partials.GuildScheduledEvent,
         Partials.User,
         Partials.ThreadMember,
-    ]
+    ],
 });
+const config = require("./src/config.js");
+const { readdirSync } = require("fs");
+const moment = require("moment");
+const { REST } = require("@discordjs/rest");
+const { Routes } = require("discord-api-types/v10");
 
+let token = config.token;
 
-client.scommands = new Collection();
-client.mcommands = new Collection()
-client.config = config;
+client.commands = new Collection();
+client.slashcommands = new Collection();
+client.commandaliases = new Collection();
 
-module.exports = client;
+const rest = new REST({ version: "10" }).setToken(token);
 
-fs.readdirSync("./handlers").forEach((handler) => {
-    try {
-        const handlerPath = `./handlers/${handler}`;
-        console.log(`${colors.green("[INFO]")} Handler Loaded ${colors.yellow(handlerPath)}`);
-        require(handlerPath)(client);
-    } catch (error) {
-        console.error(`${colors.red('[ERROR]')} Error loading handler: ${colors.yellow(handler)}`);
-        console.error(error);
+const log = (x) => {
+    console.log(`[${moment().format("DD-MM-YYYY HH:mm:ss")}] ${x}`);
+};
+
+async function loadHandlers(client) {
+    const handlerFiles = ["commandHandler", "eventHandler", "slashHandler"];
+
+    for (const file of handlerFiles) {
+        const handler = (await import(`./src/handlers/${file}.js`)).default;
+        await handler(client);
     }
+}
+
+
+// Process listeners
+process.on("unhandledRejection", (e) => {
+    console.log(e);
+});
+process.on("uncaughtException", (e) => {
+    console.log(e);
+});
+process.on("uncaughtExceptionMonitor", (e) => {
+    console.log(e);
 });
 
-
-
-
-client.login(config.token);
+loadHandlers();
+client.login(token);

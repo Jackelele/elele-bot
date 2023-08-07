@@ -1,12 +1,13 @@
-const fs = require('fs');
-const path = require('path');
-const colors = require('ansi-colors');
+const { readdirSync } = require("fs");
+const { Client, Collection, Intents } = require("discord.js");
+const path = require("path");
+const colors = require("ansi-colors");
 
 module.exports = (client, config) => {
-    const eventsPath = path.join(__dirname, '../events');
+    const eventsPath = readdirSync(`../events`);
     let loadedEvents = 0;
 
-    for (let file of fs.readdirSync(eventsPath)) {
+    for (let file of readdirSync(eventsPath)) {
         const eventFilePath = path.join(eventsPath, file);
         try {
             require(eventFilePath);
@@ -19,4 +20,4 @@ module.exports = (client, config) => {
     }
 
     console.log(`${colors.cyan('Total')} ${loadedEvents} ${colors.cyan('client events loaded.')}`);
-};
+}
